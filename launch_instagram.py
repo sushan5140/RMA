@@ -1,39 +1,28 @@
-"""Open a dedicated local Instagram window using installed Microsoft Edge.
+"""Launch an ordinary Microsoft Edge window for manual Instagram browsing.
 
-You browse manually. No automated feed collection. The isolated profile
-stays in private/ and is excluded from git.
+No Playwright/automation flags. Profile stays local in private/.
 """
+import os
+import subprocess
 from pathlib import Path
-from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent
-PROFILE = ROOT / "private" / "browser-profile"
+PROFILE = ROOT / "private" / "edge-manual-profile"
 PROFILE.mkdir(parents=True, exist_ok=True)
 
+def find_edge():
+    candidates = [
+        Path(os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)")) / "Microsoft" / "Edge" / "Application" / "msedge.exe",
+        Path(os.environ.get("PROGRAMFILES", r"C:\Program Files")) / "Microsoft" / "Edge" / "Application" / "msedge.exe",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "Edge" / "Application" / "msedge.exe",
+    ]
+    return next((p for p in candidates if p.is_file()), None)
+
 if __name__ == "__main__":
-    print("Launching Microsoft Edge using a private local RMA profile.")
-    print("No Playwright Chromium download is required.")
-    with sync_playwright() as playwright:
-        try:
-            context = playwright.chromium.launch_persistent_context(
-                user_data_dir=str(PROFILE),
-                channel="msedge",
-                headless=False,
-                viewport={"width": 480, "height": 850},
-                args=["--window-size=520,950"],
-            )
-        except Exception as exc:
-            raise SystemExit(
-                "Cannot launch Microsoft Edge. Ensure Edge is installed and close "
-                "other RMA browser instances. Details: " + str(exc)
-            )
-        try:
-            page = context.pages[0] if context.pages else context.new_page()
-            page.goto("https://www.instagram.com/reels/", wait_until="domcontentloaded")
-            print("Browse manually; close the window when done.")
-            while context.pages:
-                context.pages[0].wait_for_timeout(1000)
-        except KeyboardInterrupt:
-            pass
-        finally:
-            context.close()
+    edge = find_edge()
+    if not edge:
+        raise SystemExit("Microsoft Edge not found. Open https://www.instagram.com/reels/ in your normal Edge browser.")
+    print("Opening ordinary Microsoft Edge. Browse and sign in manually.")
+    print("This does not automatically capture or scroll reels.")
+    subprocess.Popen([str(edge), f"--user-data-dir={PROFILE}", "--new-window",
+                      "https://www.instagram.com/reels/"])
