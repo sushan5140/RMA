@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "RMA — Reel Link Collector",
+  "version": "0.1.0",
+  "description": "User-initiated Instagram reel link collector. No session access, scraping or automatic scrolling.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
