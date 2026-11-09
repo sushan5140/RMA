@@ -13,9 +13,11 @@ from urllib.parse import urlparse
 
 from flask import Flask, abort, redirect, render_template_string, request, send_file, url_for
 from werkzeug.utils import secure_filename
+from reel_memory import setup_schema
+from phase2 import register_phase2
 
 ROOT = Path(__file__).resolve().parent
-DATA = ROOT / "private"
+DATA = Path(os.environ.get("RMA_DATA_DIR", str(ROOT / "private"))).resolve()
 BATCHES = DATA / "batches"
 DATA.mkdir(exist_ok=True)
 BATCHES.mkdir(exist_ok=True)
@@ -51,6 +53,8 @@ def setup():
         );
         """)
 
+    setup_schema(DB)
+
 def utcnow():
     return datetime.now(timezone.utc).isoformat()
 
@@ -83,7 +87,7 @@ button,.button{background:#171717;color:white;border:0;cursor:pointer;text-decor
 form{display:grid;gap:13px;margin-top:12px}.muted{font-size:13px;color:#777}
 li{margin:12px 0}a{color:#171717}code{background:#f2f2f2;padding:3px 6px;border-radius:5px}
 .tag{background:#f0f0ee;border-radius:20px;padding:4px 9px;font-size:12px}
-</style></head><body><div class=row><h1>RMA</h1><span class=tag>Local-only · Phase 1</span></div>
+</style></head><body><div class=row><h1>RMA</h1><span class=tag>Local-only · Phase 2</span><a class=button href="/library">Open Reel Library</a></div>
 <p>Reel research capture → timestamped frames + audio → batches for ChatGPT review.</p>
 <div class=card><h2>Create batch</h2><form method=post action="/batches"><button>Create new batch</button></form></div>
 <div class=card><h2>Import a reel recording</h2><p class=muted>Record only media you are authorized to capture. This app does not scrape Instagram.</p>
@@ -202,6 +206,8 @@ def download_batch(batch_id):
     temp.seek(0)
     return send_file(temp, mimetype="application/zip", as_attachment=True,
                      download_name=f"Batch_{batch_id:03d}.zip")
+
+register_phase2(app, DB, BATCHES)
 
 if __name__ == "__main__":
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
