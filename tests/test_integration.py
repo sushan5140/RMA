@@ -72,9 +72,13 @@ class FlaskIntegrationTests(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertIn(b'1 matching imported reel', result.data)
         self.assertIn(b'at 00:01', result.data)
-        self.assertEqual(self.client.get('/library/1/audio').status_code, 200)
-        self.assertEqual(self.client.get('/library/1/frame/00001.jpg').status_code, 200)
-        self.assertEqual(self.client.get('/batches/1/download').status_code, 200)
+        for path in ('/library/1/audio', '/library/1/frame/00001.jpg',
+                     '/batches/1/download'):
+            response = self.client.get(path)
+            try:
+                self.assertEqual(response.status_code, 200)
+            finally:
+                response.close()
 
     def test_csrf_and_media_path_protection(self):
         self.client.get('/library/2')
