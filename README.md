@@ -4,6 +4,10 @@ Local-first Instagram research capture. **Phase 1 MVP:** a local dashboard for i
 
 This is **not** an Instagram scraper. Instagram cannot be embedded reliably in an external website; the included launcher opens a separate persistent Chromium window and you sign in yourself. No password, session cookie, browser profile, video, or audio is committed.
 
+## Phase 2 — searchable reel memory
+
+Phase 2 adds a local **Reel Library** with title/notes search, timestamped transcript cues, audio seek and preview frames. Optional offline CPU speech recognition uses a preinstalled local Whisper model; the app never downloads a model automatically. See [Phase 2 instructions](PHASE2.md). After starting the app, open `http://127.0.0.1:8765/library`.
+
 ## Setup (Windows)
 
 1. Install Python 3.10+ and [FFmpeg](https://ffmpeg.org/download.html) (both `ffmpeg` and `ffprobe` on PATH).
